@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CRMApi.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace CRMApi.Context
 {
@@ -9,6 +10,10 @@ namespace CRMApi.Context
         {
 
         }
-
+        public DbSet<Blog> Blogs { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<Project> Projects { get; set; }
+        public DbSet<Service> Services { get; set; }
+        public DbSet<User> Users { get; set; }
     }
 }

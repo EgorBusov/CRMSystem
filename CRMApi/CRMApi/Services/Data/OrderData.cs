@@ -1,6 +1,7 @@
 ﻿using CRMApi.Context;
 using CRMApi.Interfaces;
 using CRMApi.Models;
+using System.Text.RegularExpressions;
 
 namespace CRMApi.Services.Data
 {
@@ -26,6 +27,8 @@ namespace CRMApi.Services.Data
             {
                 throw new Exception("Не все обязательные поля заполнены");
             }
+            order.Status = "Получена"; 
+            order.DateCreate = DateTime.Now.ToString();
             _context.Orders.Add(order);
             _context.SaveChanges();
         }

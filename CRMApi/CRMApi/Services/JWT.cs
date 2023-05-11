@@ -1,5 +1,5 @@
 ﻿using CRMApi.Interfaces;
-using CRMApi.Models;
+using CRMApi.Models.AccountModels;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;

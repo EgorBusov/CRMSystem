@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CRMApi.Interfaces;
+using CRMApi.Models.AccountModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Data;
 
 namespace CRMApi.Controllers
 {
@@ -6,9 +10,78 @@ namespace CRMApi.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        public IActionResult Index()
+        private readonly IAccountData _accountData;
+        private readonly IJWT _jwt;
+        private readonly ISenderMail _senderMail;
+        public AccountController(IAccountData accountData, IJWT jwt, ISenderMail senderMail)
         {
-            return View();
+            _accountData = accountData;
+            _jwt = jwt;
+            _senderMail = senderMail;
+        }
+        /// <summary>
+        /// Вход в систему
+        /// </summary>
+        /// <param name="login"></param>
+        /// <returns></returns>
+        [Route("Login")]
+        [HttpPost]
+        [AllowAnonymous]
+        public IActionResult Login([FromBody] LoginModel login)
+        {           
+            var user = _accountData.GetUserByLogPass(login);
+
+            if (user.Id != 0)
+            {
+                var tokenString = _jwt.GenerateJWT(user);
+                return Ok(new { token = tokenString });
+            }
+
+            return Unauthorized();
+        }
+        /// <summary>
+        /// Регистрация в системе
+        /// </summary>
+        /// <param name="login"></param>
+        /// <returns></returns>
+        [Route("Register")]
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public IActionResult Register([FromBody] RegisterModel model)
+        {           
+            try
+            {                
+                var tokenString = _accountData.AddUser(model);
+                _senderMail.SendMail(model.Email, "Регистрация", $"Логин: {model.UserName}\nПароль: {model.Password}");
+                return Ok(new { token = tokenString });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        /// <summary>
+        /// Изменение пароля
+        /// </summary>
+        /// <param name="edit"></param>
+        /// <returns></returns>
+        [Route("EditPassword")]
+        [Authorize(Roles = "Admin")]
+        [HttpPut]
+        public IActionResult EditPassword([FromBody] EditPasswordModel edit)
+        {
+            if (edit.OldPassword == null || edit.NewPassword == null || edit.UserId == 0) { return BadRequest("Заполните все поля"); }
+            try
+            {
+                _accountData.EditPassword(edit);
+                var user = _accountData.GetUserById(edit.UserId);
+                _senderMail.SendMail(user.Email, "Изменение пароля", $"Логин: {user.UserName}\nПароль: {edit.NewPassword}");
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

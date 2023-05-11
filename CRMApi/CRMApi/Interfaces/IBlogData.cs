@@ -1,5 +1,5 @@
 ﻿using CRMApi.Models;
-using CRMApi.Models.ModelsApi;
+using CRMApi.Models.BlogModels;
 
 namespace CRMApi.Interfaces
 {
@@ -15,7 +15,7 @@ namespace CRMApi.Interfaces
         /// <param name="title"></param>
         /// <param name="description"></param>
         /// <returns></returns>
-        Task AddBlog(IFormFile formFile, string title, string description);
+        Task AddBlog(BlogModel model);
         /// <summary>
         /// Удаляет Blog
         /// </summary>
@@ -33,7 +33,7 @@ namespace CRMApi.Interfaces
         /// <param name="b"></param>
         /// <param name="formFile"></param>
         /// <returns></returns>
-        Task EditBlog(Blog b, IFormFile formFile);
+        Task EditBlog(BlogModel model);
         /// <summary>
         /// Поиск Blog по Id. Возврат BlogModel
         /// </summary>

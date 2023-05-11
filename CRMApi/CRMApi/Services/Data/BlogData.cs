@@ -1,9 +1,11 @@
 ﻿using CRMApi.Context;
 using CRMApi.Interfaces;
-using CRMApi.Models;
-using CRMApi.Models.ModelsApi;
+using CRMApi.Models.BlogModels;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.EntityFrameworkCore;
 using System.IO;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace CRMApi.Services.Data
 {
@@ -21,13 +23,18 @@ namespace CRMApi.Services.Data
         /// <returns></returns>
         private async Task<string> SavePicture(IFormFile formFile)
         {
-            string fileName = Guid.NewGuid().ToString();
-            string path = Path.Combine("Pictures/BlogPictures", fileName);
-            using (FileStream fileStream = new FileStream(path, FileMode.Create))
+            string extension = Path.GetExtension(formFile.FileName); //получаем формат файла
+            if (extension.ToLower() == ".jpeg" ||  extension.ToLower() == ".jpg")
             {
-                await formFile.CopyToAsync(fileStream);
+                string fileName = Guid.NewGuid().ToString() + formFile.FileName;
+                string path = Path.Combine(AppContext.BaseDirectory, "Pictures", "BlogPictures", fileName);
+                using (FileStream fileStream = new FileStream(path, FileMode.Create))
+                {
+                    await formFile.CopyToAsync(fileStream);//загружаем картинку в поток
+                }
+                return fileName;
             }
-            return fileName;
+            else { throw new Exception("Неверный формат"); }
         }
         /// <summary>
         /// Удаляет картинку
@@ -36,12 +43,12 @@ namespace CRMApi.Services.Data
         /// <returns></returns>
         private async Task DeletePicture(string path)
         {
-            File.Delete($"Pictures/BlogPictures/{path}.jpg");
+            File.Delete(Path.Combine(AppContext.BaseDirectory, "Pictures", "BlogPictures", path));
         }
-        public async Task AddBlog(IFormFile formFile, string title, string description)
+        public async Task AddBlog(BlogModel model)
         {
-            Blog blog = new Blog() { GuidPicture = await SavePicture(formFile),
-                                     Description = description, Title = title};
+            Blog blog = new Blog() { GuidPicture = await SavePicture(model.Picture),
+                                     Description = model.Description, Title = model.Title};
             await _context.Blogs.AddAsync(blog);
             await _context.SaveChangesAsync();
         }
@@ -59,24 +66,37 @@ namespace CRMApi.Services.Data
             foreach (Blog blog in blogs)
             {
                 BlogModel blogModel = new BlogModel() { Id = blog.Id, Description = blog.Description, Title = blog.Title };
-                blogModel.Picture = await File.ReadAllBytesAsync($"Pictures/BlogPictures/{blog.GuidPicture}.jpg");
+                byte[] bytes = await File.ReadAllBytesAsync(Path.Combine(AppContext.BaseDirectory,
+                                                                        "Pictures", "BlogPictures", blog.GuidPicture));
+                blogModel.Picture = new FormFile(new MemoryStream(bytes), 0, bytes.Length, null, blog.GuidPicture)
+                {
+                    Headers = new HeaderDictionary(),
+                    ContentType = "image/jpeg"
+                };
                 blogModels.Add(blogModel);
             }
             return blogModels;
         }
-        public async Task EditBlog(Blog b,IFormFile formFile)
+        public async Task EditBlog(BlogModel model)
         {
-            Blog blog = await _context.Blogs.FirstOrDefaultAsync(a => a.Id == b.Id) ?? throw new Exception("Blog не найден");
-            blog.GuidPicture = await SavePicture(formFile);
-            blog.Description = b.Description;
-            blog.Title = b.Title;
+
+            Blog blog = await _context.Blogs.FirstOrDefaultAsync(a => a.Id == model.Id) ?? throw new Exception("Blog не найден");
+            await DeletePicture(blog.GuidPicture);
+            blog.GuidPicture = await SavePicture(model.Picture);
+            blog.Description = model.Description;
+            blog.Title = model.Title;
             await _context.SaveChangesAsync();
         }
         public async Task<BlogModel> GetBlogById(int id)
         {
             Blog blog = await _context.Blogs.FirstOrDefaultAsync(a => a.Id == id) ?? throw new Exception("Blog не найден");
             BlogModel blogModel = new BlogModel() { Id = blog.Id, Description = blog.Description, Title = blog.Title };
-            blogModel.Picture = await File.ReadAllBytesAsync($"Pictures/BlogPictures/{blog.GuidPicture}.jpg");
+            byte[] bytes = await File.ReadAllBytesAsync(Path.Combine(AppContext.BaseDirectory, "Pictures", "BlogPictures", blog.GuidPicture));
+            blogModel.Picture = new FormFile(new MemoryStream(bytes), 0, bytes.Length, null, blog.GuidPicture)
+            {
+                Headers = new HeaderDictionary(),
+                ContentType = "image/jpeg"
+            };
             return blogModel;
         }
 

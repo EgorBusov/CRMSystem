@@ -1,4 +1,4 @@
-﻿using CRMApi.Models;
+﻿using CRMApi.Models.AccountModels;
 
 namespace CRMApi.Interfaces
 {

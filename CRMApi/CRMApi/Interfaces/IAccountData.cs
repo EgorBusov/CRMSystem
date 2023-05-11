@@ -1,4 +1,4 @@
-﻿using CRMApi.Models;
+﻿using CRMApi.Models.AccountModels;
 
 namespace CRMApi.Interfaces
 {
@@ -12,7 +12,7 @@ namespace CRMApi.Interfaces
         /// </summary>
         /// <param name="userModel"></param>
         /// <returns></returns>
-        User GetUserByLogPass(User user);
+        User GetUserByLogPass(LoginModel model);
         /// <summary>
         /// Возврат всех пользователей
         /// </summary>
@@ -22,7 +22,7 @@ namespace CRMApi.Interfaces
         /// Добавление пользователя
         /// </summary>
         /// <param name="user"></param>
-        void AddUser(User user);
+        string AddUser(RegisterModel model);
         /// <summary>
         /// Удаление пользователя
         /// </summary>
@@ -33,12 +33,25 @@ namespace CRMApi.Interfaces
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        public bool CheckUserName(User user);
+        public bool CheckUserName(string userName);
         /// <summary>
         /// Поиск пользователя по логину
         /// </summary>
         /// <param name="login"></param>
         /// <returns></returns>
         User GetUserByLogin(string login);
+        /// <summary>
+        /// Изменение пароля
+        /// </summary>
+        /// <param name="oldPassword"></param>
+        /// <param name="newPassword"></param>
+        /// <param name="userId"></param>
+        void EditPassword(EditPasswordModel edit);
+        /// <summary>
+        /// Поиск User по Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        User GetUserById(int id);
     }
 }

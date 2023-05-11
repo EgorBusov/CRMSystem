@@ -1,5 +1,5 @@
 ﻿using CRMApi.Models;
-using CRMApi.Models.ModelsApi;
+using CRMApi.Models.ProjectModels;
 
 namespace CRMApi.Interfaces
 {
@@ -12,7 +12,7 @@ namespace CRMApi.Interfaces
         /// <param name="title"></param>
         /// <param name="description"></param>
         /// <returns></returns>
-        Task AddProject(IFormFile formFile, string title, string description);
+        Task AddProject(ProjectModel model);
         /// <summary>
         /// Удаление проекта
         /// </summary>
@@ -30,7 +30,7 @@ namespace CRMApi.Interfaces
         /// <param name="p"></param>
         /// <param name="formFile"></param>
         /// <returns></returns>
-        Task EditProject(Project p, IFormFile formFile);
+        Task EditProject(ProjectModel model);
         /// <summary>
         /// Поиск Project по Id
         /// </summary>

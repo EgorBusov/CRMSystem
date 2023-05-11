@@ -24,7 +24,8 @@ namespace CRMApi.Services.Data
         {
             if(s.Name == null || s.Description == null) { throw new Exception("Обязательные поля не заполнены"); }
             Service service = _context.Services.FirstOrDefault(e => e.Id == s.Id) ?? throw new Exception("Услуга не найдена");
-            service = s;
+            service.Name = s.Name;
+            service.Description = s.Description;
             _context.SaveChanges();
         }
         public void DeleteService(Service s)
@@ -34,6 +35,7 @@ namespace CRMApi.Services.Data
         }
         public void AddService(Service s)
         {
+            if (s.Name == null || s.Description == null) { throw new Exception("Обязательные поля не заполнены"); }
             _context.Services.Add(s);
             _context.SaveChanges();
         }

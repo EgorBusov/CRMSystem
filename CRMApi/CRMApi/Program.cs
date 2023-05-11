@@ -23,6 +23,7 @@ internal class Program
         builder.Services.AddScoped<IOrderData, OrderData>();
         builder.Services.AddScoped<IProjectData, ProjectData>();
         builder.Services.AddScoped<IServiceData, ServiceData>();
+        builder.Services.AddSingleton<ISenderMail, SenderMail>();
 
         builder.Services.AddAuthentication(options => //добаление аутентификации в DI
         {
@@ -54,9 +55,12 @@ internal class Program
             app.UseSwagger();
             app.UseSwaggerUI();
         }
+        //app.UseStaticFiles();
+        //app.UseFileServer();
 
         app.UseHttpsRedirection();
 
+        app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllers();

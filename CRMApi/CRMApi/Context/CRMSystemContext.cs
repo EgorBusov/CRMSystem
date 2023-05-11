@@ -1,4 +1,7 @@
 ﻿using CRMApi.Models;
+using CRMApi.Models.AccountModels;
+using CRMApi.Models.BlogModels;
+using CRMApi.Models.ProjectModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace CRMApi.Context

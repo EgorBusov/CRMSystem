@@ -4,6 +4,7 @@ using CRMApi.Services;
 using CRMApi.Services.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -14,7 +15,7 @@ internal class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
-        string connection = builder.Configuration.GetConnectionString("DefaultConnection");
+        string connection = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new Exception("Строка подключения не найдена");
         builder.Services.AddDbContext<CRMSystemContext>(options => options.UseSqlServer(connection));
 
         builder.Services.AddScoped<IJWT, JWT>();
@@ -23,7 +24,10 @@ internal class Program
         builder.Services.AddScoped<IOrderData, OrderData>();
         builder.Services.AddScoped<IProjectData, ProjectData>();
         builder.Services.AddScoped<IServiceData, ServiceData>();
+        builder.Services.AddScoped<IResourceData, ResourceData>();
         builder.Services.AddSingleton<ISenderMail, SenderMail>();
+        builder.Services.AddSingleton<IPictureManager, PictureManager>();
+
 
         builder.Services.AddAuthentication(options => //добаление аутентификации в DI
         {
@@ -55,8 +59,6 @@ internal class Program
             app.UseSwagger();
             app.UseSwaggerUI();
         }
-        //app.UseStaticFiles();
-        //app.UseFileServer();
 
         app.UseHttpsRedirection();
 

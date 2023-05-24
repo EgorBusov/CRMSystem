@@ -70,12 +70,12 @@ namespace CRMApi.Controllers
         [HttpPut]
         public IActionResult EditPassword([FromBody] EditPasswordModel edit)
         {
-            if (edit.OldPassword == null || edit.NewPassword == null || edit.UserId == 0) { return BadRequest("Заполните все поля"); }
+            if (edit.OldPassword == null || edit.NewPassword == null || edit.UserName == null) { return BadRequest("Заполните все поля"); }
             try
             {
-                _accountData.EditPassword(edit);
-                var user = _accountData.GetUserById(edit.UserId);
-                _senderMail.SendMail(user.Email, "Изменение пароля", $"Логин: {user.UserName}\nПароль: {edit.NewPassword}");
+                int id = _accountData.EditPassword(edit);
+                var user = _accountData.GetUserById(id);
+                _senderMail.SendMail(user.Email, "Изменен пароль", $"Логин: {user.UserName}\nПароль: {edit.NewPassword}");
                 return Ok();
             }
             catch (Exception ex)

@@ -31,10 +31,10 @@ namespace CRMApi.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [Route("GetServiceByid/{id}")]
+        [Route("GetServiceById/{id}")]
         [HttpGet("{id}")]
         [AllowAnonymous]
-        public Service GetServiceByid(int id)
+        public Service GetServiceById(int id)
         {
             try
             {

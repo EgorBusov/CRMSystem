@@ -90,3 +90,4 @@ C:\Users\1\Desktop\C#\C# osnova\CRMSystem\CRMApi\CRMApi\bin\Debug\net6.0\BouncyC
 C:\Users\1\Desktop\C#\C# osnova\CRMSystem\CRMApi\CRMApi\bin\Debug\net6.0\MimeKit.dll
 C:\Users\1\Desktop\C#\C# osnova\CRMSystem\CRMApi\CRMApi\bin\Debug\net6.0\System.Security.Cryptography.Pkcs.dll
 C:\Users\1\Desktop\C#\C# osnova\CRMSystem\CRMApi\CRMApi\bin\Debug\net6.0\runtimes\win\lib\net6.0\System.Security.Cryptography.Pkcs.dll
+C:\Users\1\Desktop\C#\C# osnova\CRMSystem\CRMApi\CRMApi\bin\Debug\net6.0\CRMApi.staticwebassets.runtime.json

@@ -46,7 +46,7 @@ namespace CRMApi.Interfaces
         /// <param name="oldPassword"></param>
         /// <param name="newPassword"></param>
         /// <param name="userId"></param>
-        void EditPassword(EditPasswordModel edit);
+        int EditPassword(EditPasswordModel edit);
         /// <summary>
         /// Поиск User по Id
         /// </summary>

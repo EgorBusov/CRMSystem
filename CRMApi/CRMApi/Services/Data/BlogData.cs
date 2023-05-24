@@ -11,43 +11,16 @@ namespace CRMApi.Services.Data
 {
     public class BlogData : IBlogData
     {
+        private readonly IPictureManager _pictureManager;
         private readonly CRMSystemContext _context;       
-        public BlogData(CRMSystemContext context) 
+        public BlogData(CRMSystemContext context, IPictureManager pictureManager) 
         {
             _context = context;
-        }
-        /// <summary>
-        /// Сохраняет картинку блога
-        /// </summary>
-        /// <param name="formFile"></param>
-        /// <returns></returns>
-        private async Task<string> SavePicture(IFormFile formFile)
-        {
-            string extension = Path.GetExtension(formFile.FileName); //получаем формат файла
-            if (extension.ToLower() == ".jpeg" ||  extension.ToLower() == ".jpg")
-            {
-                string fileName = Guid.NewGuid().ToString() + formFile.FileName;
-                string path = Path.Combine(AppContext.BaseDirectory, "Pictures", "BlogPictures", fileName);
-                using (FileStream fileStream = new FileStream(path, FileMode.Create))
-                {
-                    await formFile.CopyToAsync(fileStream);//загружаем картинку в поток
-                }
-                return fileName;
-            }
-            else { throw new Exception("Неверный формат"); }
-        }
-        /// <summary>
-        /// Удаляет картинку
-        /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        private async Task DeletePicture(string path)
-        {
-            File.Delete(Path.Combine(AppContext.BaseDirectory, "Pictures", "BlogPictures", path));
+            _pictureManager = pictureManager;
         }
         public async Task AddBlog(BlogModel model)
         {
-            Blog blog = new Blog() { GuidPicture = await SavePicture(model.Picture),
+            Blog blog = new Blog() { GuidPicture = await _pictureManager.SavePicture(model.Picture, @"Pictures\BlogPictures"),
                                      Description = model.Description, Title = model.Title};
             await _context.Blogs.AddAsync(blog);
             await _context.SaveChangesAsync();
@@ -55,7 +28,7 @@ namespace CRMApi.Services.Data
         public async Task DeleteBlog(int idBlog)
         {
             Blog blog = await _context.Blogs.FirstOrDefaultAsync(b => b.Id == idBlog) ?? throw new Exception("Запись не найдена");
-            await DeletePicture(blog.GuidPicture);
+            await _pictureManager.DeletePicture(blog.GuidPicture, @"Pictures\BlogPictures");
             _context.Blogs.Remove(blog);
             await _context.SaveChangesAsync();
         }
@@ -81,8 +54,8 @@ namespace CRMApi.Services.Data
         {
 
             Blog blog = await _context.Blogs.FirstOrDefaultAsync(a => a.Id == model.Id) ?? throw new Exception("Blog не найден");
-            await DeletePicture(blog.GuidPicture);
-            blog.GuidPicture = await SavePicture(model.Picture);
+            await _pictureManager.DeletePicture(blog.GuidPicture, @"Pictures\BlogPictures");
+            blog.GuidPicture = await _pictureManager.SavePicture(model.Picture, @"Pictures\BlogPictures");
             blog.Description = model.Description;
             blog.Title = model.Title;
             await _context.SaveChangesAsync();

@@ -12,6 +12,6 @@ namespace CRMWebForWorker.Models.AccountModels
         [Required]
         public string NewPassword { get; set; }
         [Required]
-        public int UserId { get; set; }
+        public string UserName { get; set; }
     }
 }

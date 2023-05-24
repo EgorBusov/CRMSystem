@@ -1,0 +1,17 @@
+﻿
+.personal-account {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background: blue;
+}
+
+.menu {
+    position: absolute;
+    top: 70px;
+    bottom: 0;
+    left: 0;
+    width: 70px;
+    background: blue;
+}

@@ -2,6 +2,7 @@
 using CRMApi.Models.AccountModels;
 using CRMApi.Models.BlogModels;
 using CRMApi.Models.ProjectModels;
+using CRMApi.Models.ResourceModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace CRMApi.Context
@@ -18,5 +19,10 @@ namespace CRMApi.Context
         public DbSet<Project> Projects { get; set; }
         public DbSet<Service> Services { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<Header> Phrases { get; set; }
+        public DbSet<Button> Buttons { get; set; }
+        public DbSet<Contact> Contacts { get; set; }
+        public DbSet<MainPageContent> MainPageContents { get; set; }
+        public DbSet<OurInformation> OurInformation { get; set; }
     }
 }

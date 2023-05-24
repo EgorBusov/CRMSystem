@@ -7,6 +7,9 @@ using System.Web.Http;
 
 namespace CRMWebForWorker.ApiInteraction.ApiRequests
 {
+    /// <summary>
+    /// Запросы касаемо аккаунта
+    /// </summary>
     public class AccountRequests
     {
         private readonly HttpClient _httpClient;
@@ -84,9 +87,9 @@ namespace CRMWebForWorker.ApiInteraction.ApiRequests
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
         /// <exception cref="HttpResponseException"></exception>
-        public async Task<bool> EditPassword(EditPasswordModel model, string token)
+        public async Task<bool> EditPasswordRequest(EditPasswordModel model, string token)
         {
-            if (model.OldPassword == null || model.NewPassword == null || model.UserId == 0) { throw new Exception("Заполните все поля"); }
+            if (model.OldPassword == null || model.NewPassword == null || model.UserName == null) { throw new Exception("Заполните все поля"); }
             var json = JsonSerializer.Serialize(model);
             var data = new StringContent(json, Encoding.UTF8, "application/json");
 

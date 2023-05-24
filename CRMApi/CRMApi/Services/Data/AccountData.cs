@@ -53,17 +53,17 @@ namespace CRMApi.Services.Data
 
         public void RemoveUser(int userId)
         {
-            User user = _context.Users.FirstOrDefault(a => a.Id == userId);
-            if (user == null) { throw new Exception("User не найден"); }
+            User user = _context.Users.FirstOrDefault(a => a.Id == userId) ?? throw new Exception("User не найден");
             _context.Users.Remove(user);
             _context.SaveChanges();
         }
-        public void EditPassword(EditPasswordModel edit)
+        public int EditPassword(EditPasswordModel edit)
         {
-            User user = _context.Users.FirstOrDefault(a => a.Id.Equals(edit.UserId)) ?? throw new Exception("Запись не найдена");
+            User user = _context.Users.FirstOrDefault(a => a.UserName.Equals(edit.UserName)) ?? throw new Exception("Запись не найдена");
             if (user.PasswordHash != _jwt.HashPassword(edit.OldPassword)) { throw new Exception("Пароль неверный"); }
             user.PasswordHash = _jwt.HashPassword(edit.NewPassword);
             _context.SaveChanges();
+            return user.Id;
         }
 
         public User GetUserById(int id)

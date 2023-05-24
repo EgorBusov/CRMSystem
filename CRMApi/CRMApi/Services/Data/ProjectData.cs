@@ -11,45 +11,17 @@ namespace CRMApi.Services.Data
     public class ProjectData : IProjectData
     {
         private readonly CRMSystemContext _context;
-        public ProjectData(CRMSystemContext context) 
+        private readonly IPictureManager _pictureManager;
+        public ProjectData(CRMSystemContext context, IPictureManager pictureManager) 
         {
             _context = context;
-        }
-        /// <summary>
-        /// Сохранение картинки проекта
-        /// </summary>
-        /// <param name="formFile"></param>
-        /// <returns></returns>
-        private async Task<string> SavePicture(IFormFile formFile)
-        {
-            string extension = Path.GetExtension(formFile.FileName); //получаем формат файла
-            if (extension.ToLower() == ".jpeg" || extension.ToLower() == ".jpg")
-            {
-                string fileName = Guid.NewGuid().ToString() + formFile.FileName;
-                string path = Path.Combine(AppContext.BaseDirectory, "Pictures", "ProjectPictures", fileName);
-                using (FileStream fileStream = new FileStream(path, FileMode.Create))
-                {
-                    await formFile.CopyToAsync(fileStream);
-                }
-                return fileName;
-            }
-            else { throw new Exception("Неверный формат"); }
-            
-        }
-        /// <summary>
-        /// Удаление картинки проекта
-        /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        private async Task DeletePicture(string path)
-        {
-            File.Delete(Path.Combine(AppContext.BaseDirectory, "Pictures", "ProjectPictures", path));
+            _pictureManager = pictureManager;
         }
         public async Task AddProject(ProjectModel model)
         {
             Project project = new Project()
             {
-                GuidPicture = await SavePicture(model.Picture),
+                GuidPicture = await _pictureManager.SavePicture(model.Picture, @"Pictures\ProjectPictures"),
                 Description = model.Description,
                 Title = model.Title
             };
@@ -59,7 +31,7 @@ namespace CRMApi.Services.Data
         public async Task DeleteProject(int idProject)
         {
             Project project = await _context.Projects.FirstOrDefaultAsync(b => b.Id == idProject) ?? throw new Exception("Запись не найдена");
-            await DeletePicture(project.GuidPicture);
+            await _pictureManager.DeletePicture(project.GuidPicture, @"Pictures\ProjectPictures");
             _context.Projects.Remove(project);
             await _context.SaveChangesAsync();
         }
@@ -83,11 +55,11 @@ namespace CRMApi.Services.Data
         }
         public async Task EditProject(ProjectModel model)
         {
-            Project blog = await _context.Projects.FirstOrDefaultAsync(a => a.Id == model.Id) ?? throw new Exception("Запись не найдена");
-            await DeletePicture(blog.GuidPicture);
-            blog.GuidPicture = await SavePicture(model.Picture);
-            blog.Description = model.Description;
-            blog.Title = model.Title;
+            Project project = await _context.Projects.FirstOrDefaultAsync(a => a.Id == model.Id) ?? throw new Exception("Запись не найдена");
+            await _pictureManager.DeletePicture(project.GuidPicture, @"Pictures\ProjectPictures");
+            project.GuidPicture = await _pictureManager.SavePicture(model.Picture, @"Pictures\ProjectPictures");
+            project.Description = model.Description;
+            project.Title = model.Title;
             await _context.SaveChangesAsync();
         }
         public async Task<ProjectModel> GetProjectById(int id)

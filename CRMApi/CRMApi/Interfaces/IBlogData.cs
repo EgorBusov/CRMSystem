@@ -26,7 +26,7 @@ namespace CRMApi.Interfaces
         /// Получение всех Blogs в виде BlogModel
         /// </summary>
         /// <returns></returns>
-        Task<IEnumerable<BlogModel>> GetBlogModels();
+        Task<IEnumerable<BlogPath>> GetBlogs();
         /// <summary>
         /// Изменение Blog
         /// </summary>
@@ -39,6 +39,6 @@ namespace CRMApi.Interfaces
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        Task<BlogModel> GetBlogById(int id);
+        Task<BlogPath> GetBlogById(int id);
     }
 }

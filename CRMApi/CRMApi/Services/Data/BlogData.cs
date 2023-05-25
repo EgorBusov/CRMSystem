@@ -1,6 +1,7 @@
 ﻿using CRMApi.Context;
 using CRMApi.Interfaces;
 using CRMApi.Models.BlogModels;
+using CRMApi.Models.ProjectModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.EntityFrameworkCore;
@@ -12,15 +13,17 @@ namespace CRMApi.Services.Data
     public class BlogData : IBlogData
     {
         private readonly IPictureManager _pictureManager;
-        private readonly CRMSystemContext _context;       
-        public BlogData(CRMSystemContext context, IPictureManager pictureManager) 
+        private readonly CRMSystemContext _context;
+        private readonly string baseUrl;
+        public BlogData(CRMSystemContext context, IPictureManager pictureManager, IConfiguration configuration) 
         {
             _context = context;
             _pictureManager = pictureManager;
+            baseUrl = configuration.GetValue<string>("BaseUrl:Url");
         }
         public async Task AddBlog(BlogModel model)
         {
-            Blog blog = new Blog() { GuidPicture = await _pictureManager.SavePicture(model.Picture, @"Pictures\BlogPictures"),
+            Blog blog = new Blog() { GuidPicture = await _pictureManager.SavePicture(model.Picture),
                                      Description = model.Description, Title = model.Title};
             await _context.Blogs.AddAsync(blog);
             await _context.SaveChangesAsync();
@@ -28,49 +31,41 @@ namespace CRMApi.Services.Data
         public async Task DeleteBlog(int idBlog)
         {
             Blog blog = await _context.Blogs.FirstOrDefaultAsync(b => b.Id == idBlog) ?? throw new Exception("Запись не найдена");
-            await _pictureManager.DeletePicture(blog.GuidPicture, @"Pictures\BlogPictures");
+            await _pictureManager.DeletePicture(blog.GuidPicture);
             _context.Blogs.Remove(blog);
             await _context.SaveChangesAsync();
         }
-        public async Task<IEnumerable<BlogModel>> GetBlogModels()
+        public async Task<IEnumerable<BlogPath>> GetBlogs()
         {
             List<Blog> blogs = await _context.Blogs.ToListAsync();
-            List<BlogModel> blogModels = new List<BlogModel>();
+            List<BlogPath> blogPaths = new List<BlogPath>();
             foreach (Blog blog in blogs)
             {
-                BlogModel blogModel = new BlogModel() { Id = blog.Id, Description = blog.Description, Title = blog.Title };
-                byte[] bytes = await File.ReadAllBytesAsync(Path.Combine(AppContext.BaseDirectory,
-                                                                        "Pictures", "BlogPictures", blog.GuidPicture));
-                blogModel.Picture = new FormFile(new MemoryStream(bytes), 0, bytes.Length, null, blog.GuidPicture)
-                {
-                    Headers = new HeaderDictionary(),
-                    ContentType = "image/jpeg"
-                };
-                blogModels.Add(blogModel);
+                BlogPath blogPath = new BlogPath() { Id = blog.Id, Description = blog.Description, Title = blog.Title };
+                blogPath.Picture = $"{baseUrl}/Resource/GetPicture/{blog.GuidPicture}";
+                blogPaths.Add(blogPath);
             }
-            return blogModels;
+            return blogPaths;
         }
         public async Task EditBlog(BlogModel model)
         {
 
             Blog blog = await _context.Blogs.FirstOrDefaultAsync(a => a.Id == model.Id) ?? throw new Exception("Blog не найден");
-            await _pictureManager.DeletePicture(blog.GuidPicture, @"Pictures\BlogPictures");
-            blog.GuidPicture = await _pictureManager.SavePicture(model.Picture, @"Pictures\BlogPictures");
+            if (model.Picture.Length > 0)
+            {
+                await _pictureManager.DeletePicture(blog.GuidPicture);
+                blog.GuidPicture = await _pictureManager.SavePicture(model.Picture);
+            }
             blog.Description = model.Description;
             blog.Title = model.Title;
             await _context.SaveChangesAsync();
         }
-        public async Task<BlogModel> GetBlogById(int id)
+        public async Task<BlogPath> GetBlogById(int id)
         {
             Blog blog = await _context.Blogs.FirstOrDefaultAsync(a => a.Id == id) ?? throw new Exception("Blog не найден");
-            BlogModel blogModel = new BlogModel() { Id = blog.Id, Description = blog.Description, Title = blog.Title };
-            byte[] bytes = await File.ReadAllBytesAsync(Path.Combine(AppContext.BaseDirectory, "Pictures", "BlogPictures", blog.GuidPicture));
-            blogModel.Picture = new FormFile(new MemoryStream(bytes), 0, bytes.Length, null, blog.GuidPicture)
-            {
-                Headers = new HeaderDictionary(),
-                ContentType = "image/jpeg"
-            };
-            return blogModel;
+            BlogPath blogPath = new BlogPath() { Id = blog.Id, Description = blog.Description, Title = blog.Title };
+            blogPath.Picture = $"{baseUrl}/Resource/GetPicture/{blog.GuidPicture}";
+            return blogPath;
         }
 
     }

@@ -23,7 +23,7 @@ namespace CRMApi.Interfaces
         /// Получение всех Project в виде ProjectModel
         /// </summary>
         /// <returns></returns>
-        Task<IEnumerable<ProjectModel>> GetProjectModels();
+        Task<IEnumerable<ProjectPath>> GetProjects();
         /// <summary>
         /// Изменение проекта
         /// </summary>
@@ -36,6 +36,6 @@ namespace CRMApi.Interfaces
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        Task<ProjectModel> GetProjectById(int id);
+        Task<ProjectPath> GetProjectById(int id);
     }
 }

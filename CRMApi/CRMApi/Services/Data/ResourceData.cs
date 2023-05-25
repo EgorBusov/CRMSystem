@@ -3,6 +3,7 @@ using CRMApi.Interfaces;
 using CRMApi.Models.BlogModels;
 using CRMApi.Models.ProjectModels;
 using CRMApi.Models.ResourceModels;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CRMApi.Services.Data
@@ -14,10 +15,22 @@ namespace CRMApi.Services.Data
     {
         private readonly CRMSystemContext _context;
         private readonly IPictureManager _pictureManager;
-        public ResourceData(CRMSystemContext context, IPictureManager pictureManager)
+        private readonly string baseUrl;
+        public ResourceData(CRMSystemContext context, IPictureManager pictureManager, IConfiguration configuration)
         {
             _context = context;
             _pictureManager = pictureManager;
+            baseUrl = configuration.GetValue<string>("BaseUrl:Url");
+        }
+
+        public async Task<MemoryStream> GetPicture(string fileName)
+        {
+            byte[] bytes = await File.ReadAllBytesAsync(Path.Combine(AppContext.BaseDirectory,
+                "Pictures", fileName));
+            if (bytes.Length == 0)
+            {
+                throw new Exception("Файл не найден"); }
+            return new MemoryStream(bytes);
         }
 
         #region Phrases
@@ -50,33 +63,18 @@ namespace CRMApi.Services.Data
         #endregion
 
         #region Contacts
-        public async Task<IEnumerable<ContactBytes>> GetContactModels()
+        public async Task<IEnumerable<ContactPath>> GetContacts()
         {
             List<Contact> contacts = await _context.Contacts.ToListAsync();
-            //List<ContactModel> contactModels = new List<ContactModel>();
-            List<ContactBytes> contactBytes = new List<ContactBytes>();
-            //foreach (Contact contact in contacts)
-            //{
-            //    ContactModel contactModel = new ContactModel() { Id = contact.Id, Link = contact.Link, GuidPicture = contact.GuidPicture };
-            //    byte[] bytes = await File.ReadAllBytesAsync(Path.Combine(AppContext.BaseDirectory,
-            //                                                             "Pictures", "ContactPictures", contact.GuidPicture));
-
-            //    contactModel.Picture = new FormFile(new MemoryStream(bytes), 0, bytes.Length, null, contact.GuidPicture)
-            //    {
-            //        Headers = new HeaderDictionary(),
-            //        ContentType = "image/jpeg"
-            //    };
-            //    contactModels.Add(contactModel);
-            //}
-
+            List<ContactPath> contactPaths = new List<ContactPath>();
+            
             foreach (Contact contact in contacts)
             {
-                ContactBytes contactByte = new ContactBytes() { Id = contact.Id, Link = contact.Link };
-                contactByte.GuidPicture = await File.ReadAllBytesAsync(Path.Combine(AppContext.BaseDirectory,
-                    "Pictures", "ContactPictures", contact.GuidPicture));
-                contactBytes.Add(contactByte);
+                ContactPath contactByte = new ContactPath() { Id = contact.Id, Link = contact.Link };
+                contactByte.Picture = $"{baseUrl}/Resource/GetPicture/{contact.GuidPicture}";
+                contactPaths.Add(contactByte);
             }
-            return contactBytes;
+            return contactPaths;
         }
 
         public async Task AddContact(ContactModel model)
@@ -86,7 +84,7 @@ namespace CRMApi.Services.Data
                 throw new Exception("Обязательные поля не заполнены");}
             Contact contact = new Contact()
             {
-                GuidPicture = await _pictureManager.SavePicture(model.Picture, @"Pictures\ContactPictures"),
+                GuidPicture = await _pictureManager.SavePicture(model.Picture),
                 Link = model.Link,
             };
             await _context.Contacts.AddAsync(contact);
@@ -95,7 +93,7 @@ namespace CRMApi.Services.Data
         public async Task DeleteContact(int idContact)
         {
             Contact contact = await _context.Contacts.FirstOrDefaultAsync(b => b.Id == idContact) ?? throw new Exception("Запись не найдена");
-            await _pictureManager.DeletePicture(contact.GuidPicture, @"Pictures\ContactPictures");
+            await _pictureManager.DeletePicture(contact.GuidPicture);
             _context.Contacts.Remove(contact);
             await _context.SaveChangesAsync();
         }
@@ -122,31 +120,28 @@ namespace CRMApi.Services.Data
         #endregion
 
         #region OurInformation
-        public async Task<OurInformationModel> GetInformationModel(int id = 1)
+        public async Task<OurInformationPath> GetInformationModel(int id = 1)
         {
             OurInformation inf = await _context.OurInformation.FirstOrDefaultAsync(a => a.Id == id) ?? new OurInformation();
-            OurInformationModel model = new OurInformationModel() { Address = inf.Address, Fax = inf.Fax, Id = inf.Id, 
+            OurInformationPath path = new OurInformationPath() { Address = inf.Address, Fax = inf.Fax, Id = inf.Id, 
                                                                     GuidPicture = inf.GuidPicture, Telephone = inf.Telephone };
-            byte[] bytes = await File.ReadAllBytesAsync(Path.Combine(AppContext.BaseDirectory,
-                                                                        "Pictures", "OtherPictures", inf.GuidPicture));
-            model.Picture = new FormFile(new MemoryStream(bytes), 0, bytes.Length, null, inf.GuidPicture)
-            {
-                Headers = new HeaderDictionary(),
-                ContentType = "image/jpeg"
-            };
-            return model;
+            path.Picture = $"{baseUrl}/Resource/GetPicture/{inf.GuidPicture}";
+            return path;
         }
 
         public async Task<bool> EditInformationModel(OurInformationModel model)
         {
-            if (model.Picture == null || model.Address == null || model.Telephone == null ||
+            if (model.Address == null || model.Telephone == null ||
                 model.Fax == null)
             {
                 throw new Exception("Обязательные поля не заполнены");}
             OurInformation inf = await _context.OurInformation.FirstOrDefaultAsync(a => a.Id == model.Id) 
                                                                                 ?? throw new Exception("Информация не найдена");
-            await _pictureManager.DeletePicture(inf.GuidPicture, @"Pictures\OtherPictures");
-            inf.GuidPicture = await _pictureManager.SavePicture(model.Picture, @"Pictures\OtherPictures");
+            if (model.Picture.Length != 0)
+            {
+                await _pictureManager.DeletePicture(inf.GuidPicture);
+                inf.GuidPicture = await _pictureManager.SavePicture(model.Picture);
+            }
             inf.Fax = model.Fax;
             inf.Id = model.Id;
             inf.Address = model.Address;
@@ -154,8 +149,6 @@ namespace CRMApi.Services.Data
             await _context.SaveChangesAsync();
             return true;
         }
-        #endregion       
-       
-
+        #endregion
     }
 }

@@ -26,7 +26,7 @@ namespace CRMApi.Interfaces
         /// Получение всех контактов
         /// </summary>
         /// <returns></returns>
-        Task<IEnumerable<ContactBytes>> GetContactModels();
+        Task<IEnumerable<ContactPath>> GetContacts();
         /// <summary>
         /// Добавление контакта
         /// </summary>
@@ -39,7 +39,6 @@ namespace CRMApi.Interfaces
         /// <param name="idContact"></param>
         /// <returns></returns>
         Task DeleteContact(int idContact);
-
         /// <summary>
         /// Получение контента для главной страницы
         /// </summary>
@@ -57,12 +56,14 @@ namespace CRMApi.Interfaces
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        Task<OurInformationModel> GetInformationModel(int id = 1);
+        Task<OurInformationPath> GetInformationModel(int id = 1);
         /// <summary>
         /// Изменение информации о компании
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
         Task<bool> EditInformationModel(OurInformationModel model);
+
+        Task<MemoryStream> GetPicture(string fileName);
     }
 }

@@ -60,12 +60,12 @@ namespace CRMApi.Controllers
         /// Получение всех проектов
         /// </summary>
         /// <returns></returns>
-        [Route("GetProjectModels")]
+        [Route("GetProjects")]
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IEnumerable<ProjectModel>> GetProjectModels()
+        public async Task<IEnumerable<ProjectPath>> GetProjectModels()
         {
-            return await _projectData.GetProjectModels();
+            return await _projectData.GetProjects();
         }
         /// <summary>
         /// Изменение проекта
@@ -95,7 +95,7 @@ namespace CRMApi.Controllers
         [Route("GetProjectById/{id}")]
         [HttpGet("{id}")]
         [AllowAnonymous]
-        public async Task<ProjectModel> GetProjectById(int id)
+        public async Task<ProjectPath> GetProjectById(int id)
         {
             try
             {
@@ -103,7 +103,7 @@ namespace CRMApi.Controllers
             }
             catch
             {
-                return new ProjectModel();
+                return new ProjectPath();
             }
         }
 

@@ -15,7 +15,22 @@ namespace CRMApi.Controllers
         {
             _resourceData = resourceData;
         }
-        
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("GetPicture/{fileName}")]
+        public async Task<IActionResult> GetPicture(string fileName)
+        {
+            try
+            {
+                return File(await _resourceData.GetPicture(fileName), "image/jpeg");
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         #region Phrases
         /// <summary>
         /// Получение главной фразы в header 
@@ -73,10 +88,10 @@ namespace CRMApi.Controllers
         /// <returns></returns>
         [HttpGet]
         [AllowAnonymous]
-        [Route("GetContactModels")]
-        public async Task<IEnumerable<ContactBytes>> GetContactModels()
+        [Route("GetContacts")]
+        public async Task<IEnumerable<ContactPath>> GetContactModels()
         {
-            return await _resourceData.GetContactModels();
+            return await _resourceData.GetContacts();
         }
         /// <summary>
         /// Добавление контакта
@@ -164,7 +179,7 @@ namespace CRMApi.Controllers
         [HttpGet]
         [AllowAnonymous]
         [Route("GetInformationModel")]
-        public async Task<OurInformationModel> GetInformationModel()
+        public async Task<OurInformationPath> GetInformationModel()
         {
             return await _resourceData.GetInformationModel();
         }

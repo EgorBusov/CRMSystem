@@ -65,13 +65,12 @@ namespace CRMApi.Controllers
         /// Получение всех блогов
         /// </summary>
         /// <returns></returns>
-        [Route("GetBlogModels")]
+        [Route("GetBlogs")]
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IEnumerable<BlogModel>> GetBlogModels()
+        public async Task<IEnumerable<BlogPath>> GetBlogs()
         {
-            IEnumerable<BlogModel> a = await _blogData.GetBlogModels();
-            return a;
+            return await _blogData.GetBlogs();
         }
         /// <summary>
         /// Изменение блога
@@ -101,7 +100,7 @@ namespace CRMApi.Controllers
         [Route("GetBlogById/{id}")]
         [HttpGet("{id}")]
         [AllowAnonymous]
-        public async Task<BlogModel> GetBlogById(int id)
+        public async Task<BlogPath> GetBlogById(int id)
         {
             try
             {
@@ -109,7 +108,7 @@ namespace CRMApi.Controllers
             }
             catch (Exception ex)
             {
-                return new BlogModel();
+                return new BlogPath();
             }
         }
     }

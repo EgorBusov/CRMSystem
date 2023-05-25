@@ -26,7 +26,7 @@ namespace CRMWebForWorker.Controllers
         {
             try
             {
-                IEnumerable<ProjectModel> models = await _projectRequests.GetProjectModelsRequest();
+                IEnumerable<ProjectModel> models = await _projectRequests.GetProjectsRequest();
                 List<ProjectToView> projectToViews = new List<ProjectToView>();
                 foreach (var model in models)
                 {

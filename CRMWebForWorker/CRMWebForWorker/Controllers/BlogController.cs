@@ -25,7 +25,7 @@ namespace CRMWebForWorker.Controllers
         {
             try
             {
-                IEnumerable<BlogModel> models = await _blogRequests.GetBlogModelsRequest();
+                IEnumerable<BlogModel> models = await _blogRequests.GetBlogsRequest();
                 List<BlogToView> blogToViews = new List<BlogToView>();
                 foreach (var model in models)
                 {

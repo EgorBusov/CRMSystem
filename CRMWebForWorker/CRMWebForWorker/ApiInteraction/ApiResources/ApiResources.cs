@@ -40,9 +40,9 @@ namespace CRMWebForWorker.ApiInteraction.ApiResources
 
         #region Contacts
 
-        private IEnumerable<ContactToView> _contactsToView;
+        private IEnumerable<ContactPath> _contactsToView;
 
-        public IEnumerable<ContactToView> ContactsToView
+        public IEnumerable<ContactPath> ContactsToView
         {
             get { return _contactsToView; }
             private set { _contactsToView = value; }
@@ -64,9 +64,9 @@ namespace CRMWebForWorker.ApiInteraction.ApiResources
 
         #region OurInformation
 
-        private OurInformationToView _ourInformationToView;
+        private OurInformationPath _ourInformationToView;
 
-        public OurInformationToView OurInformationToView
+        public OurInformationPath OurInformationToView
         {
             get { return _ourInformationToView; }
             private set { _ourInformationToView = value; }
@@ -87,70 +87,15 @@ namespace CRMWebForWorker.ApiInteraction.ApiResources
         }
 
         /// <summary>
-        /// Конвертирует коллекцию ContactModel в ContactToView
-        /// </summary>
-        /// <param name="models"></param>
-        /// <returns></returns>
-        private async Task<IEnumerable<ContactToView>> ConvertContactToView(IEnumerable<ContactModel> models)
-        {
-            if (models.ToList().Count == 0)
-            {
-                return new List<ContactToView>();
-            }
-            List<ContactToView> contactToViews = new List<ContactToView>();
-            foreach (var model in models)
-            {
-                using (var memoryStream = new MemoryStream())
-                {
-                    ContactToView view = new ContactToView() { Id = model.Id, Link = model.Link};
-                    await model.Picture.CopyToAsync(memoryStream);
-                    var imageBytes = memoryStream.ToArray();
-                    var imageBase64 = Convert.ToBase64String(imageBytes);
-
-                    view.Picture = imageBase64;
-                    contactToViews.Add(view);
-                }
-            }
-
-            return contactToViews;
-        }
-
-        /// <summary>
-        /// Конвертирует OurInformationModel в OurInformationToView
-        /// </summary>
-        /// <param name="models"></param>
-        /// <returns></returns>
-        private async Task<OurInformationToView> ConvertOurInformationToView(OurInformationModel model)
-        {
-            if (model == null)
-            {
-                return new OurInformationToView();
-            }
-            OurInformationToView view = new OurInformationToView()
-                { Id = model.Id, Address = model.Address, Fax = model.Fax, Telephone = model.Telephone };
-
-            using (var memoryStream = new MemoryStream())
-            {
-                await model.Picture.CopyToAsync(memoryStream);
-                var imageBytes = memoryStream.ToArray();
-                var imageBase64 = Convert.ToBase64String(imageBytes);
-
-                view.Picture = imageBase64;
-            }
-
-            return view;
-        }
-
-        /// <summary>
         /// Получение ресурсов
         /// </summary>
         public async Task GetResources()
         {
             Header = await _resourceRequests.GetPhraseRequest();
             Buttons = await _resourceRequests.GetButtonsRequest();
-            ContactsToView = await ConvertContactToView(await _resourceRequests.GetContactModelsRequest());
+            ContactsToView = await _resourceRequests.GetContactsRequest();
             MainPageContent = await _resourceRequests.GetMainPageRequest();
-            OurInformationToView = await ConvertOurInformationToView(await _resourceRequests.GetInformationModelRequest());
+            OurInformationToView = await _resourceRequests.GetInformationRequest();
         }
 
         #endregion

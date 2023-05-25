@@ -78,9 +78,9 @@ namespace CRMWebForWorker.ApiInteraction.ApiRequests
         /// </summary>
         /// <returns></returns>
         /// <exception cref="HttpResponseException"></exception>
-        public async Task<IEnumerable<ProjectModel>> GetProjectModelsRequest()
+        public async Task<IEnumerable<ProjectPath>> GetProjectsRequest()
         {
-            var response = await _httpClient.GetAsync($"{_baseUrl}/Project/GetProjectModels");
+            var response = await _httpClient.GetAsync($"{_baseUrl}/Project/GetProjects");
             if (response.IsSuccessStatusCode)
             {
                 var responseStream = await response.Content.ReadAsStreamAsync();
@@ -88,8 +88,8 @@ namespace CRMWebForWorker.ApiInteraction.ApiRequests
                 {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase // имена свойств должны быть в формате camelCase
                 };
-                var models = await JsonSerializer.DeserializeAsync<IEnumerable<ProjectModel>>(responseStream, options);
-                return models ?? new List<ProjectModel>();
+                var models = await JsonSerializer.DeserializeAsync<IEnumerable<ProjectPath>>(responseStream, options);
+                return models ?? new List<ProjectPath>();
             }
             else
             {
@@ -110,8 +110,11 @@ namespace CRMWebForWorker.ApiInteraction.ApiRequests
             content.Add(new StringContent(model.Title), "Title");
             content.Add(new StringContent(model.Description), "Description");
 
-            var pictureContent = new StreamContent(model.Picture.OpenReadStream());
-            content.Add(pictureContent, "Picture");
+            if (model.Picture.Length > 0)
+            {
+                var pictureContent = new StreamContent(model.Picture.OpenReadStream());
+                content.Add(pictureContent, "Picture");
+            }
 
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var response = await _httpClient.PutAsync($"{_baseUrl}/Project/EditProject", content);
@@ -134,7 +137,7 @@ namespace CRMWebForWorker.ApiInteraction.ApiRequests
         /// <param name="id"></param>
         /// <returns></returns>
         /// <exception cref="HttpResponseException"></exception>
-        public async Task<ProjectModel> GetProjectByIdRequest(int id)
+        public async Task<ProjectPath> GetProjectByIdRequest(int id)
         {
             var response = await _httpClient.GetAsync($"{_baseUrl}/Project/GetProjectById/{id}");
             if (response.IsSuccessStatusCode)
@@ -144,8 +147,8 @@ namespace CRMWebForWorker.ApiInteraction.ApiRequests
                 {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase // имена свойств должны быть в формате camelCase
                 };
-                var model = await JsonSerializer.DeserializeAsync<ProjectModel>(responseStream, options);
-                return model ?? new ProjectModel();
+                var model = await JsonSerializer.DeserializeAsync<ProjectPath>(responseStream, options);
+                return model ?? new ProjectPath();
             }
             else
             {

@@ -1,6 +1,6 @@
 ﻿namespace CRMWebForWorker.Models.BlogModels
 {
-    public class BlogToView : BlogModel
+    public class BlogPath : BlogModel
     {
         public new string Picture { get; set; }
     }

@@ -89,7 +89,7 @@ namespace CRMApi.Controllers
         [HttpGet]
         [AllowAnonymous]
         [Route("GetContacts")]
-        public async Task<IEnumerable<ContactPath>> GetContactModels()
+        public async Task<IEnumerable<ContactPath>> GetContacts()
         {
             return await _resourceData.GetContacts();
         }
@@ -178,8 +178,8 @@ namespace CRMApi.Controllers
         /// <returns></returns>
         [HttpGet]
         [AllowAnonymous]
-        [Route("GetInformationModel")]
-        public async Task<OurInformationPath> GetInformationModel()
+        [Route("GetInformation")]
+        public async Task<OurInformationPath> GetInformation()
         {
             return await _resourceData.GetInformationModel();
         }

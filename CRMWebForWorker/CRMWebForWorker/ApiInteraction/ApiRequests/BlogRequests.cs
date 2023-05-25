@@ -77,9 +77,9 @@ namespace CRMWebForWorker.ApiInteraction.ApiRequests
         /// Получение всех блогов
         /// </summary>
         /// <returns></returns>
-        public async Task<IEnumerable<BlogModel>> GetBlogModelsRequest()
+        public async Task<IEnumerable<BlogPath>> GetBlogsRequest()
         {
-            var response = await _httpClient.GetAsync($"{_baseUrl}/Blog/GetBlogModels");
+            var response = await _httpClient.GetAsync($"{_baseUrl}/Blog/GetBlogs");
             if (response.IsSuccessStatusCode)
             {
                 var responeStream = await response.Content.ReadAsStreamAsync();
@@ -87,8 +87,8 @@ namespace CRMWebForWorker.ApiInteraction.ApiRequests
                 {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase // имена свойств должны быть в формате camelCase
                 };
-                var models = await JsonSerializer.DeserializeAsync<IEnumerable<BlogModel>>(responeStream, options);
-                return models ?? new List<BlogModel>();
+                var models = await JsonSerializer.DeserializeAsync<IEnumerable<BlogPath>>(responeStream, options);
+                return models ?? new List<BlogPath>();
             }
             else
             {
@@ -132,7 +132,7 @@ namespace CRMWebForWorker.ApiInteraction.ApiRequests
         /// <param name="id"></param>
         /// <returns></returns>
         /// <exception cref="HttpResponseException"></exception>
-        public async Task<BlogModel> GetBlogByIdRequest(int id)
+        public async Task<BlogPath> GetBlogByIdRequest(int id)
         {
             var response = await _httpClient.GetAsync($"{_baseUrl}/Blog/GetBlogById/{id}");
             if (response.IsSuccessStatusCode)
@@ -142,8 +142,8 @@ namespace CRMWebForWorker.ApiInteraction.ApiRequests
                 {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase // имена свойств должны быть в формате camelCase
                 };
-                var model = await JsonSerializer.DeserializeAsync<BlogModel>(responeStream, options);
-                return model ?? new BlogModel();
+                var model = await JsonSerializer.DeserializeAsync<BlogPath>(responeStream, options);
+                return model ?? new BlogPath();
             }
             else
             {

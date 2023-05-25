@@ -112,9 +112,9 @@ namespace CRMWebForWorker.ApiInteraction.ApiRequests
         /// </summary>
         /// <returns></returns>
         /// <exception cref="HttpResponseException"></exception>
-        public async Task<IEnumerable<ContactModel>> GetContactModelsRequest()
+        public async Task<IEnumerable<ContactPath>> GetContactsRequest()
         {
-            var response = await _httpClient.GetAsync($"{_baseUrl}/Resource/GetContactModels");
+            var response = await _httpClient.GetAsync($"{_baseUrl}/Resource/GetContacts");
             if (response.IsSuccessStatusCode)
             {
                 var responseStream = await response.Content.ReadAsStreamAsync();
@@ -123,8 +123,8 @@ namespace CRMWebForWorker.ApiInteraction.ApiRequests
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 };
 
-                var contactModels = await JsonSerializer.DeserializeAsync<IEnumerable<ContactModel>>(responseStream,options);
-                return contactModels ?? new List<ContactModel>();
+                var contactModels = await JsonSerializer.DeserializeAsync<IEnumerable<ContactPath>>(responseStream,options);
+                return contactModels ?? new List<ContactPath>();
             }
             else if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
@@ -257,9 +257,9 @@ namespace CRMWebForWorker.ApiInteraction.ApiRequests
         /// </summary>
         /// <returns></returns>
         /// <exception cref="HttpResponseException"></exception>
-        public async Task<OurInformationModel> GetInformationModelRequest()
+        public async Task<OurInformationPath> GetInformationRequest()
         {
-            var response = await _httpClient.GetAsync($"{_baseUrl}/Resource/GetInformationModel");
+            var response = await _httpClient.GetAsync($"{_baseUrl}/Resource/GetInformation");
             if (response.IsSuccessStatusCode)
             {
                 var responseStream = await response.Content.ReadAsStreamAsync();
@@ -268,8 +268,8 @@ namespace CRMWebForWorker.ApiInteraction.ApiRequests
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 };
 
-                var information = await JsonSerializer.DeserializeAsync<OurInformationModel>(responseStream, options);
-                return information ?? new OurInformationModel();
+                var information = await JsonSerializer.DeserializeAsync<OurInformationPath>(responseStream, options);
+                return information ?? new OurInformationPath();
             }
             else
             {
@@ -292,8 +292,11 @@ namespace CRMWebForWorker.ApiInteraction.ApiRequests
             content.Add(new StringContent(model.Address), "Address");
             content.Add(new StringContent(model.Fax), "Fax");
 
-            var pictureContent = new StreamContent(model.Picture.OpenReadStream());
-            content.Add(pictureContent, "Picture");
+            if (model.Picture.Length > 0)
+            {
+                var pictureContent = new StreamContent(model.Picture.OpenReadStream());
+                content.Add(pictureContent, "Picture");
+            }
 
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var response = await _httpClient.PutAsync($"{_baseUrl}/Resource/EditInformationModel", content);
